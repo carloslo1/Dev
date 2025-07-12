@@ -1,16 +1,26 @@
 name: hello-world
+
 # trigger
 on:
   push:
     branches: ["stage"]
+
+env:
+  TEXT: "Carlos"
+
 # pipeline
 jobs:
-  print: # job name
-  # ejecuta el pipeline en una VM Ubuntu
+  print:
     runs-on: ubuntu-latest
 
-    # Pasos a ejecutar
     steps:
       - name: print-to-screen
-        run: echo "Hello World!"
-        
+        run: return 1
+
+      - name: The job has succeded?
+        if: ${{ success() }}
+        run: echo "Job Success !!!!"
+
+      - name: The job has fail
+        if: ${{ failure() }}
+        run: echo "Job Fails xxxxx"
