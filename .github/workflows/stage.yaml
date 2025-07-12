@@ -10,29 +10,28 @@ env:
   OPS_REPO: carloslo1/Ops
   OPS_BRANCH: main
 
-
 jobs:
  build:
    runs-on: ubuntu-latest
    steps:
-     - name: checkout code
+    - name: checkout code
        uses: actions/checkout@v3
        with:
          fetch-depth: 0
 
-     - name: Login to Docker
+    - name: Login to Docker
        uses: docker/login-action@v2
        with:
          username: ${{ secrets.DOCKER_USERNAME }}
          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Get TAG version
+    - name: Get TAG version
       run: echo "RELEASE_VERSION=$(git tag --sort=-creatordate | head -1)" >> $GITHUB_ENV
 
-      - name: Show Tag Version
+    - name: Show Tag Version
       run: echo ${{ env.RELEASE_VERSION }}
 
-           - name: Build & push
+    - name: Build & push
        uses: docker/build-push-action@v3
        with:
          push: true
