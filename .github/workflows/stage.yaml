@@ -1,0 +1,105 @@
+name: STAGE
+
+on:
+  push:
+    branches: ["stage"]
+
+env:
+  REGISTRY: carloslo1
+  IMAGE_NAME: kubelabs_publicapi
+  OPS_REPO: carloslo1/Ops
+  OPS_BRANCH: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    outputs:
+      RELEASE_VERSION: ${{ steps.tagVersion.outputs.RELEASE_VERSION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Login to Docker
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get tag version
+        run: echo "RELEASE_VERSION=$(git tag --sort=-creatordate | head -1)" >> $GITHUB_ENV
+
+      - name: Output tag version
+        id: tagVersion
+        run: |
+          echo "RELEASE_VERSION=${{ env.RELEASE_VERSION }}"
+          echo "RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_OUTPUT
+
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+          build-args: |
+            APP_ENV=${{ secrets.APP_ENV }}
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+
+    env:
+      VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+
+    steps:
+      - name: checkout OPS CODE
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.OPS_REPO }}
+          ssh-key: ${{ secrets.OPS_TOKEN }}
+          path: ops
+
+      - name: setup kustomize
+        uses: imranismail/setup-kustomize@v2
+        with:
+          kustomize-version: "3.6.1"
+
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -la
+          echo "Contents of ops directory:"
+          ls -la ops/
+          echo "Looking for overlays:"
+          find ops/ -name "overlays" -type d
+          echo "Full directory tree:"
+          find ops/ -type d | head -20
+          
+      - name: show new version
+        run: |
+          echo ${{ env.VERSION }}
+          echo ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+
+      - name: update kube resources
+        run: |
+          # Change to the correct path based on your repo structure
+          cd ops/public-api/overlays/stage
+
+          kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+
+          kustomize build . > kustomized-apps.yml
+          cat kustomized-apps.yml
+
+      - name: Commit files
+        run: |
+          cd ops
+          git config --local user.email "carlos.lozano.salazar@gmail.com"
+          git config --local user.name "carloslo1"
+          git add .
+          git diff-index --quiet HEAD || git commit -am "New image version. Branch staging. tag: ${{ env.VERSION }}"
+          git push --force origin ${{ env.OPS_BRANCH }}
+###
