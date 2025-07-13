@@ -78,6 +78,11 @@ jobs:
           find ops/ -name "overlays" -type d
           echo "Full directory tree:"
           find ops/ -type d | head -20
+          
+      - name: show new version
+        run: |
+          echo ${{ env.VERSION }}
+          echo ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
       - name: update kube resources
         run: |
