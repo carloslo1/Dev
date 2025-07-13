@@ -87,7 +87,7 @@ jobs:
       - name: update kube resources
         run: |
           # Change to the correct path based on your repo structure
-          cd /home/azureuser/ops/public-api/overlays/stage
+          cd Ops/public-api/overlays/stage
 
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
