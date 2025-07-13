@@ -4,15 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "build": "rm -rf ./dist && mkdir dist && babel ./src --out-dir dist",
-    "start": "node dist/main.js",
-    "dist": "rm -rf dist/ && npm run build && npm start",
-    "dev": "nodemon src/main.js --ext js,graphql --exec babel-node",
-    "serve": "nodemon dist/main.js",
-    "lint": "eslint .",
-    "install:clean": "rm -rf node_modules/ && rm -rf dist/ && rm -rf package-lock.json && npm install && npm run dev",
-    "lint:fix": "eslint . --fix",
-    "test": "babel-node src/api/testing/data.js"
+    "test": "babel-node src/main.js"
   },
   "author": "Carlos Chacón Calvo, Victor Rodriguez Miranda",
   "license": "ISC",
