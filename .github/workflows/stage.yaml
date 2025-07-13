@@ -60,15 +60,26 @@ jobs:
         with:
           repository: ${{ env.OPS_REPO }}
           ssh-key: ${{ secrets.OPS_TOKEN }}
+          path: ops  # Especifica la ruta donde clonar
 
       - name: setup kustomize
         uses: imranismail/setup-kustomize@v2
         with:
           kustomize-version: "3.6.1"
 
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -la
+          echo "Contents of ops directory:"
+          ls -la ops/
+          echo "Looking for public-api:"
+          find . -name "public-api" -type d
+
       - name: update kube resources
         run: |
-          cd public-api/overlays/stage
+          cd ops/public-api/overlays/stage
 
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
@@ -77,6 +88,7 @@ jobs:
 
       - name: Commit files
         run: |
+          cd ops
           git config --local user.email "carlos.lozano.salazar@gmail.com"
           git config --local user.name "carloslo1"
           git add .
