@@ -1,0 +1,67 @@
+name: Production Deployment
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout DEV repo
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Build Docker image
+      run: |
+        docker build -t carloslo1/kubelabs_publicapi:${{ github.sha }} .
+        
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        
+    - name: Push Docker image
+      run: |
+        docker push carloslo1/kubelabs_publicapi:${{ github.sha }}
+        
+    - name: Checkout OPS repo
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ secrets.OPS_REPO }}
+        token: ${{ secrets.OPS_TOKEN }}
+        path: ops
+        
+    - name: Update Kustomize image tag
+      run: |
+        cd ops/public-api/overlays/production
+        sed -i "s/newTag: .*/newTag: ${{ github.sha }}/" kustomization.yaml
+        
+    - name: Create APP_ENV file
+      run: |
+        cd ops/public-api/overlays/production
+        echo '${{ secrets.APP_ENV_PROD }}' > app.env
+        
+    - name: Commit and push changes
+      run: |
+        cd ops
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "Branch production" || exit 0
+        git push
