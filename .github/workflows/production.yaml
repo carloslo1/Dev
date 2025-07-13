@@ -60,8 +60,8 @@ jobs:
     - name: Commit and push changes
       run: |
         cd ops
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        git config --local user.email "carlos.lozano.salazar@gmail.com"
+        git config --local user.name "carloslo1"
         git add -A
         git commit -m "Branch production" || exit 0
         git push
