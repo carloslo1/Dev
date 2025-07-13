@@ -81,7 +81,7 @@ jobs:
 
       - name: update kube resources
         run: |
-          cd ops/public-api/overlays/stage
+          cd ops/overlays/stage
 
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
