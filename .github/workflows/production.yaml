@@ -88,6 +88,8 @@ jobs:
         run: |
           cd ops/public-api/overlays/production
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          kustomize build . > kustomized-apps.yml  # 
+          cat kustomized-apps.yml                   # 
 
       - name: Commit files
         run: |
