@@ -5,9 +5,9 @@ on:
     branches: ["stage"]
 
 env:
-  REGISTRY: cachac
+  REGISTRY: carloslo1
   IMAGE_NAME: kubelabs_publicapi
-  OPS_REPO: Storylabs-Learning/ops
+  OPS_REPO: carloslo1/Ops
   OPS_BRANCH: main
 
 jobs:
