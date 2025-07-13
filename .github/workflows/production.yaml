@@ -79,23 +79,6 @@ jobs:
         with:
           kustomize-version: "3.6.1"
 
-      - name: Debug directory structure
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Contents:"
-          ls -la
-          echo "Contents of ops directory:"
-          ls -la ops/
-          echo "Looking for overlays:"
-          find ops/ -name "overlays" -type d
-          echo "Full directory tree:"
-          find ops/ -type d | head -20
-          
-      - name: show new version
-        run: |
-          echo ${{ env.VERSION }}
-          echo ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-
       - name: Create APP_ENV file
         run: |
           cd ops/public-api/overlays/production
@@ -103,13 +86,8 @@ jobs:
 
       - name: update kube resources
         run: |
-          # Change to the correct path for production
           cd ops/public-api/overlays/production
-
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-
-          kustomize build . > kustomized-apps.yml
-          cat kustomized-apps.yml
 
       - name: Commit files
         run: |
@@ -118,4 +96,4 @@ jobs:
           git config --local user.name "carloslo1"
           git add .
           git diff-index --quiet HEAD || git commit -am "New image version. Branch production. SHA: ${{ env.VERSION }}"
-          git push --force origin ${{ env.OPS_BRANCH }}
+          git push origin ${{ env.OPS_BRANCH }}
