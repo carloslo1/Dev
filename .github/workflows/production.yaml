@@ -43,7 +43,7 @@ jobs:
     - name: Checkout OPS repo
       uses: actions/checkout@v4
       with:
-        repository: ${{ secrets.OPS_REPO }}
+        repository: ${{ env.OPS_REPO }}
         token: ${{ secrets.OPS_TOKEN }}
         path: ops
         
