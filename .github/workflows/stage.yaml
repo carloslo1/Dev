@@ -76,6 +76,8 @@ jobs:
           ls -la ops/
           echo "Looking for public-api:"
           find . -name "public-api" -type d
+          echo "Full directory tree:"
+          find ops/ -type d | head -20
 
       - name: update kube resources
         run: |
