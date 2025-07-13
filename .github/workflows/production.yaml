@@ -42,7 +42,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Get SHA version
-        run: echo "RELEASE_VERSION=${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=$(git tag --sort=-creatordate | head -1)" >> $GITHUB_ENV
 
       - name: Output SHA version
         id: tagVersion
