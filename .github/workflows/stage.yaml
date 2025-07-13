@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Get tag version
-        run: echo "RELEASE_VERSION=$(git tag --sort=-creatordate | head -1)" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=$(git rev-parse --short HEAD | head -1)" >> $GITHUB_ENV
 
       - name: Output tag version
         id: tagVersion
@@ -102,4 +102,4 @@ jobs:
           git add .
           git diff-index --quiet HEAD || git commit -am "New image version. Branch staging. tag: ${{ env.VERSION }}"
           git push --force origin ${{ env.OPS_BRANCH }}
-##
+###
