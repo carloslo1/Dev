@@ -60,7 +60,7 @@ jobs:
         with:
           repository: ${{ env.OPS_REPO }}
           ssh-key: ${{ secrets.OPS_TOKEN }}
-          path: ops  # Especifica la ruta donde clonar
+          path: ops
 
       - name: setup kustomize
         uses: imranismail/setup-kustomize@v2
@@ -74,14 +74,15 @@ jobs:
           ls -la
           echo "Contents of ops directory:"
           ls -la ops/
-          echo "Looking for public-api:"
-          find . -name "public-api" -type d
+          echo "Looking for overlays:"
+          find ops/ -name "overlays" -type d
           echo "Full directory tree:"
           find ops/ -type d | head -20
 
       - name: update kube resources
         run: |
-          cd ops/overlays/stage
+          # Change to the correct path based on your repo structure
+          cd ops/public-api/overlays/stage
 
           kustomize edit set image KUSTOMIZE-DEFINED=${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
 
@@ -96,5 +97,3 @@ jobs:
           git add .
           git diff-index --quiet HEAD || git commit -am "New image version. Branch staging. tag: ${{ env.VERSION }}"
           git push --force origin ${{ env.OPS_BRANCH }}
-
-#
